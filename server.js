@@ -18,19 +18,25 @@ const allowedOrigins = [
   "https://chat-app-frontend-brown-nine.vercel.app",
 ];
 
-// ✅ CORS
+// ✅ CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error("Not allowed by CORS"));
     },
-    credentials: true,
+    credentials: true, // allow cookies
   })
 );
 
+// ✅ Handle preflight OPTIONS requests for all routes
+app.options("*", cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
 // ✅ Middleware
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "5mb" })); // parse JSON bodies
 app.use(cookieParser());
 
 // ✅ API routes
