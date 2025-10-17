@@ -2,7 +2,6 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
 
 dotenv.config();
 
@@ -19,10 +18,6 @@ const allowedOrigins = [
   "https://chat-app-frontend-brown-nine.vercel.app",
 ];
 
-
-
-
-
 // ✅ CORS
 app.use(
   cors({
@@ -34,40 +29,13 @@ app.use(
   })
 );
 
-
-
-
-
 // ✅ Middleware
 app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
-
-
-
 // ✅ API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-
-
-
-
-// ✅ Serve frontend in production
-if (ENV.NODE_ENV === "production") {
-  const __dirname = path.resolve();
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
-
-
-
-
-  // Correct regex-based catch-all route
-  app.get(/^(?!\/api).*$/, (_, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  });
-}
-
-
-
 
 // ✅ Start server
 server.listen(PORT, () => {
