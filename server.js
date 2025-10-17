@@ -1,8 +1,9 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+
 dotenv.config();
 
 import authRoutes from "./routes/auth.route.js";
@@ -11,13 +12,11 @@ import { connectDB } from "./db/db.js";
 import { ENV } from "./lib/env.js";
 import { app, server } from "./lib/socket.js";
 
-const __dirname = path.resolve();
 const PORT = ENV.PORT || 3000;
 
-// ✅ Allowed frontend origins
+// ✅ Allowed frontend origin (deployment)
 const allowedOrigins = [
-  "http://localhost:5173", // local dev
-  "https://chat-app-frontend-brown-nine.vercel.app", // your deployed frontend
+  "https://chat-app-frontend-brown-nine.vercel.app",
 ];
 
 // ✅ CORS configuration
@@ -35,19 +34,21 @@ app.use(
 );
 
 // ✅ Middleware
-app.use(express.json({ limit: "5mb" })); // for req.body
+app.use(express.json({ limit: "5mb" })); // parse JSON bodies
 app.use(cookieParser());
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// ✅ Deployment setup (optional, if you serve frontend from backend later)
+// ✅ Serve frontend if in production
 if (ENV.NODE_ENV === "production") {
+  const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  // ✅ Correct wildcard route to serve SPA
+  app.get("/*", (_, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
 
