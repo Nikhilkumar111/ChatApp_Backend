@@ -14,43 +14,60 @@ import { app, server } from "./lib/socket.js";
 
 const PORT = ENV.PORT || 3000;
 
-// ✅ Allowed frontend origin (deployment)
+// ✅ Allowed frontend origin
 const allowedOrigins = [
   "https://chat-app-frontend-brown-nine.vercel.app",
 ];
 
-// ✅ CORS configuration
+
+
+
+
+// ✅ CORS
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error("Not allowed by CORS"));
     },
-    credentials: true, // allow cookies
+    credentials: true,
   })
 );
 
+
+
+
+
 // ✅ Middleware
-app.use(express.json({ limit: "5mb" })); // parse JSON bodies
+app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 
-// ✅ API Routes
+
+
+
+// ✅ API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// ✅ Serve frontend if in production
+
+
+
+// ✅ Serve frontend in production
 if (ENV.NODE_ENV === "production") {
   const __dirname = path.resolve();
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  // ✅ Correct wildcard route to serve SPA
-  app.get("/*", (_, res) => {
+
+
+
+  // Correct regex-based catch-all route
+  app.get(/^(?!\/api).*$/, (_, res) => {
     res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
+
+
+
 
 // ✅ Start server
 server.listen(PORT, () => {
